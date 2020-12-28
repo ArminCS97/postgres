@@ -42,7 +42,7 @@ def create_tables():
     conn = None
     try:
         # read the connection parameters
-        params = config()
+        params = config(filename='database.ini', section='postgresql')
         # connect to the PostgreSQL server
         conn = psycopg2.connect(**params)
         cur = conn.cursor()

@@ -6,7 +6,7 @@ DATABASE_URL = 'postgresql://postgres:137627054402@localhost/suppliers'
 
 # Whenever we want to use SQLAlchemy to interact with a database, we need to create an Engine.
 # echo flag determines if we want to see the sql code generated or not
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False)
 
 # scoped_session cares about threads here
 DatabaseSession = scoped_session(sessionmaker(autocommit=False,
