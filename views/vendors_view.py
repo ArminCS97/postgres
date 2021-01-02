@@ -1,5 +1,5 @@
 from flask import jsonify, Blueprint
-from models.models import Vendor
+from models.models2 import Vendor
 from database.database import DatabaseSession
 
 vendors_blueprint = Blueprint('Vendors', __name__)

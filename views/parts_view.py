@@ -1,7 +1,9 @@
 from flask import jsonify, Blueprint
 
 from database.database import DatabaseSession
-from models.models import Part, PartDrawing, Vendor
+from models.models1 import Part
+from models.models4 import PartDrawing
+from models.models2 import Vendor
 
 parts_blueprint = Blueprint('Parts', __name__)
 

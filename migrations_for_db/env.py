@@ -1,9 +1,9 @@
+import os
+import importlib
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config, MetaData
 from sqlalchemy import pool
-from models.models import metadata
-
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -18,7 +18,27 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = metadata
+def combine_metadata(metadata_objects):
+    metadata = MetaData()
+    for metadata_object in metadata_objects:
+        for table in metadata_object.tables.values():
+            # The aim of this line is to avoid a warning that table X already exists
+            if str(table) not in list(metadata.tables.keys()):
+                table.tometadata(metadata)
+    return metadata
+
+def get_metadata_of_all_models():
+    # Attention: we have to set the python path to models folder so that we dont get an error
+    # set PYTHONPATH=%PYTHONPATH%;D:\Projects\postgres\models
+    metadata_objects = []
+    for model_module in os.listdir('D:\Projects\postgres\models'):
+        if model_module not in ['__init__.py', 'get_all.py', '__pycache__']:
+            model_module_name = model_module[:-3]
+            globals()[model_module_name] = importlib.import_module(model_module_name, package='models')
+            metadata_objects.append(globals()[model_module_name].metadata)
+    return metadata_objects
+
+target_metadata = combine_metadata(get_metadata_of_all_models())
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

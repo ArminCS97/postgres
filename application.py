@@ -23,6 +23,7 @@ def shutdown_session(exception=None):
     DatabaseSession.remove()
 
 application.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(application)
 migrate = Migrate(application, db)
 manager = Manager(application)
