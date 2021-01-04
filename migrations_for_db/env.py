@@ -1,7 +1,7 @@
-import os
-import importlib
+import logging
 from logging.config import fileConfig
-
+from application import migrate
+from models import models3, models4, models1, models2
 from sqlalchemy import engine_from_config, MetaData
 from sqlalchemy import pool
 from alembic import context
@@ -13,6 +13,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
+logger = logging.getLogger('alembic.env')
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -27,18 +28,12 @@ def combine_metadata(metadata_objects):
                 table.tometadata(metadata)
     return metadata
 
-def get_metadata_of_all_models():
-    # Attention: we have to set the python path to models folder so that we dont get an error
-    # set PYTHONPATH=%PYTHONPATH%;D:\Projects\postgres\models
-    metadata_objects = []
-    for model_module in os.listdir('D:\Projects\postgres\models'):
-        if model_module not in ['__init__.py', 'get_all.py', '__pycache__']:
-            model_module_name = model_module[:-3]
-            globals()[model_module_name] = importlib.import_module(model_module_name, package='models')
-            metadata_objects.append(globals()[model_module_name].metadata)
-    return metadata_objects
 
-target_metadata = combine_metadata(get_metadata_of_all_models())
+config.set_main_option(
+    'sqlalchemy.url',
+    str(migrate.db.engine.url).replace('%', '%%'))
+
+target_metadata = combine_metadata([models2.metadata, models1.metadata, models4.metadata, models3.metadata])
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -77,6 +72,17 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
+
+    # this callback is used to prevent an auto-migration from being generated
+    # when there are no changes to the schema
+    # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
+    def process_revision_directives(context, revision, directives):
+        if getattr(config.cmd_opts, 'autogenerate', False):
+            script = directives[0]
+            if script.upgrade_ops.is_empty():
+                directives[:] = []
+                logger.info('No changes in schema detected.')
+
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
@@ -85,7 +91,8 @@ def run_migrations_online():
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata,
+            process_revision_directives=process_revision_directives
         )
 
         with context.begin_transaction():

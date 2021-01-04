@@ -21,5 +21,5 @@ def init_db():
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
-    from models import models3, models4, models1, models2
+    from models import models4, models1, models2, models3
     Base.metadata.create_all(bind=engine)

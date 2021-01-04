@@ -1,8 +1,8 @@
 # coding: utf-8
-from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, MetaData, String, Table
+from sqlalchemy import Column, ForeignKey, LargeBinary, String
+
 from database.database import Base
 from models.models1 import Part
-
 
 metadata = Base.metadata
 
